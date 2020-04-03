@@ -60,7 +60,18 @@
      INT = 276,
      CHAINE = 277,
      OUVERTE = 278,
-     FERMANTE = 279
+     FERMANTE = 279,
+     POINT_VIRGULE = 280,
+     DEUX_POINTS = 281,
+     POINT = 282,
+     VIRGULE = 283,
+     WRITE = 284,
+     READ = 285,
+     WRITELN = 286,
+     READLN = 287,
+     COMMERR = 288,
+     COMMERRO = 289,
+     COMMERRON = 290
    };
 #endif
 

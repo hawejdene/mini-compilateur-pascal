@@ -8,6 +8,11 @@ void output(char* msg) {
 		printf("Analyseur lexicale: %s\n", msg);
 	}
 }
+void err(char* msg) {
+	if(outputLexical == 1) {
+		printf("[Erreur]: %s\n", msg);
+	}
+}
 	/* chaine de caractéres utilisé avec la fonction output() */
 char buffer[50];
 
@@ -26,7 +31,6 @@ oprel    ==|<>|<|>|<=|>=|not
 opadd    \+|-|or
 opmul    \*|\/|div|mod|and
 chaine	 \'[^\']*\'
-commentaire "{"[^{}]*"}"
 blanc			[ \t\n]+
 iderror  {chiffre}({lettre}|{chiffre})*
 oppaffect  :=
@@ -35,12 +39,20 @@ ouvrante  (\()
 fermante  (\))
 COMMENT_LINE        "//"
 NOM_FONCTION  {id}/{blanc}*{ouvrante}[^{}]*{fermante}
+commentaire "/*"[^\*]*"*/"
+commentErr  "/"[^\*]*"*/"
+commentErro  "/*"[^\*]*"/"
+commentErron  "/*"[^\*]*"*"
 %%
 "\n" 														    ++yylineno;
-"write"															{output(" Keyword :write");}
-"read"	                                                        {output(" Keyword :read");}
-"writeln"														{output(" Keyword :writeln");}
-"readln"	                                                    {output(" Keyword :readln" );}
+"write"															{output(" Keyword :write"); return WRITE;}
+"read"	                                                        {output(" Keyword :read"); return READ;}
+"writeln"														{output(" Keyword :writeln"); return WRITELN;}
+"readln"	                                                    {output(" Keyword :readln" ); return READLN;}
+";"															{output(" Keyword : point virgule");	 return POINT_VIRGULE;	}
+":"															{output(" Keyword : deux points");	 return DEUX_POINTS;	}
+"."															{output(" Keyword : point");	 return POINT;	}
+","															{output(" Keyword : virgule");	 return VIRGULE;	}
 [bB][eE][gG][iI][nN]    										{output(" Keyword : begin");	 return BEGIN_TOKEN;	}
 [dD][oO]			    										{output(" keyword : do "); 	 return DO;	    }
 [iI][fF]														{output(" keyword : if ");	 return IF; 	}
@@ -57,10 +69,27 @@ NOM_FONCTION  {id}/{blanc}*{ouvrante}[^{}]*{fermante}
 {id}															{sprintf(buffer, "ID: %s (%d caractere(s))", yytext, yyleng);
 																output(buffer);
 																return ID;}
-{nb}                                                            {	
+{nb}                                                            {
 																	sprintf(buffer, "NB: %s (%d caractere(s))", yytext, yyleng);
 																	output(buffer);
 																	return NB;	}
+{commentaire} 											 {
+																	sprintf(buffer, "Commentaire: %s (%d caractere(s))", yytext, yyleng);
+																	output(buffer);
+																		}
+{commentErr} 											 {
+																	sprintf(buffer, "Commentaire Errone Etoile debut: %s (%d caractere(s))", yytext, yyleng);
+																	err(buffer);
+																	return COMMERR;	}
+{commentErro} 											 {
+																	sprintf(buffer, "Commentaire Errone Etoile fin: %s (%d caractere(s))", yytext, yyleng);
+																	err(buffer);
+																	return COMMERRO;	}
+
+{commentErron} 											 {
+																	sprintf(buffer, "Commentaire Errone slash fin: %s (%d caractere(s))", yytext, yyleng);
+																	err(buffer);
+																	return COMMERRON;	}
 {blanc}									{
 											/* les caractéres blancs sont à ignorer, on ne retourne rien */
 										}
@@ -93,7 +122,8 @@ NOM_FONCTION  {id}/{blanc}*{ouvrante}[^{}]*{fermante}
 																    	sprintf(buffer, "CHAINE: %s (%d caractere(s))", yytext, yyleng);
 																		output(buffer);
 																		return CHAINE;}
-{iderror}              											{return(stderr,"illegal identifier \'%s\' on line :%d\n",yytext,yylineno);}
+
+
 . 																{
 																	sprintf(buffer, "AUTRE: %s (%d caractere(s))", yytext, yyleng);
 																	output(buffer);

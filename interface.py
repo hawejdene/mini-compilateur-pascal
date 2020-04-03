@@ -85,7 +85,7 @@ class Ui_INSAT(QWidget):
         with tempfile.NamedTemporaryFile(delete=False, mode='w+t') as fp:
             fp.writelines(self.txtCode.toPlainText())
             fp.seek(0)
-            output = os.popen(r'test.exe"' + " < " + fp.name).read()
+            output = os.popen(r'"E:\GL4\sem2\compilation\syntaxique\tp\test.exe"' + " < " + fp.name).read()
             self.txtOutput.setText(output)
 
     def new(self):
